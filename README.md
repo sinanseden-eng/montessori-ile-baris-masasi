@@ -45,7 +45,7 @@ Sonraki GitHub güncellemeleri Netlify'da otomatik olarak yeniden yayınlanır.
 ## Yapı
 
 - `app/page.tsx`: Kitabın içeriği ve bütün etkileşimler
-- `app/globals.css`: Tasarım, karakterler, baloncuklar ve animasyonlar
+- `app/globals.css`: Flipbook düzeni, konuşma baloncukları ve sayfa animasyonları
 - `app/layout.tsx`: Sayfa başlığı ve açıklaması
 - `netlify.toml`: Netlify derleme ve yayın ayarları
 

@@ -407,19 +407,15 @@ function Brand() {
 }
 
 function speakerName(scene: Scenario, speaker: Speaker) {
-  if (speaker === "teacher") return "Öğretmen · Danışman";
+  if (speaker === "teacher") return "Öğretmen · Montessori danışmanı";
   return scene.names[speaker];
 }
 
 function CartoonCharacter({ role, name, active = false, mood = "calm", placement = "" }: { role: Speaker; name: string; active?: boolean; mood?: "calm" | "tense"; placement?: string }) {
   return (
-    <div className={"cartoon-character role-" + role + " mood-" + mood + (active ? " speaking" : "") + (placement ? " " + placement : "")} aria-label={name + (active ? ", konuşuyor" : "")}>
-      <div className="toon-figure">
-        <span className="toon-head"><i className="toon-hair" /><i className="toon-eye eye-left" /><i className="toon-eye eye-right" /><i className="toon-mouth" /><i className="toon-glasses" /></span>
-        <span className="toon-body"><i className="toon-arm arm-left" /><i className="toon-arm arm-right" /></span>
-        <span className="toon-legs"><i /><i /></span>
-      </div>
-      <b>{name}</b><small>{role === "teacher" ? "Danışman" : role === "a" ? "Çocuk A" : "Çocuk B"}</small>
+    <div className={"speaker-token role-" + role + " mood-" + mood + (active ? " speaking" : "") + (placement ? " " + placement : "")} aria-label={name + (active ? ", konuşuyor" : "")}>
+      <span>{role === "teacher" ? "M" : name.slice(0, 1)}</span>
+      <div><b>{name}</b><small>{role === "teacher" ? "Montessori danışmanı" : role === "a" ? "Çocuk A" : "Çocuk B"}</small></div>
     </div>
   );
 }
@@ -472,25 +468,22 @@ function DialoguePanel({ kind, scene, step }: { kind: "wrong" | "right"; scene: 
   const lines = scene[kind];
   const good = kind === "right";
   const activeSpeaker = step > 0 ? lines[Math.min(step - 1, lines.length - 1)]?.speaker : undefined;
+  const activeLine = step > 0 ? lines[Math.min(step - 1, lines.length - 1)] : undefined;
   return (
     <article className={"dialogue-panel " + kind}>
       <header>
         <span className="approach-mark">{good ? "✓" : "×"}</span>
         <div><small>{good ? "BUNU YAP" : "BUNU YAPMA"}</small><h3>{good ? "Danışmanlık alan açar" : "Yargıçlık kararı kapatır"}</h3></div>
       </header>
-      <div className="mini-cartoon-stage" style={{ "--scene": scene.color } as React.CSSProperties}>
-        <CartoonCharacter role="teacher" name="Öğretmen" active={activeSpeaker === "teacher"} mood={good ? "calm" : "tense"} placement="mini-teacher" />
-        <CartoonCharacter role="a" name={scene.names.a} active={activeSpeaker === "a"} mood={good ? "calm" : "tense"} placement="mini-a" />
-        <CartoonCharacter role="b" name={scene.names.b} active={activeSpeaker === "b"} mood={good ? "calm" : "tense"} placement="mini-b" />
-        <SceneVignette scene={scene} calm={good} />
+      <div className="speaker-key" style={{ "--scene": scene.color } as React.CSSProperties}>
+        <CartoonCharacter role={activeSpeaker || "teacher"} name={activeSpeaker ? speakerName(scene, activeSpeaker).split(" · ")[0] : "Montessori"} active mood={good ? "calm" : "tense"} />
+        <span>{good ? "Gözlem → soru → geri çekilme" : "Hüküm → emir → bağımlılık"}</span>
       </div>
       <div className="dialogue-stream" aria-live="polite">
-        {step === 0 && <div className="dialogue-placeholder"><span>•••</span><p>Diyalog başlamak için sabırsızlanıyor.</p></div>}
-        {lines.map((line, index) => step > index && (
-          <div className={"bubble speaker-" + line.speaker} key={kind + "-" + index} style={{ animationDelay: String(index * 55) + "ms" }}>
-            <b>{speakerName(scene, line.speaker)}</b><p>{line.text}</p>
-          </div>
-        ))}
+        {!activeLine && <div className="dialogue-placeholder"><span>•••</span><p>Baloncuklar birazdan konuşacak.</p></div>}
+        {activeLine && <div className={"bubble speaker-" + activeLine.speaker} key={kind + "-" + step}>
+          <b>{speakerName(scene, activeLine.speaker)}</b><p>{activeLine.text}</p>
+        </div>}
       </div>
       <div className={"dialogue-result " + (step >= lines.length ? "show" : "")}>
         <span>{good ? "↗" : "↘"}</span><p>{good ? scene.rightResult : scene.wrongResult}</p>
@@ -503,13 +496,13 @@ function PageHeading({ number, eyebrow, title, text, onHome }: { number: string;
   return (
     <header className="page-heading">
       <div className="page-number">{number}</div>
-      <div><p>{eyebrow}</p><h1>{title}</h1><span>{text}</span></div>
+      <div><p>MARIA MONTESSORİ · {eyebrow}</p><h1>{title}</h1><span>{text}</span></div>
       <button className="home-button" onClick={onHome}><span>⌂</span>Kapağa dön</button>
     </header>
   );
 }
 
-const DIALOGUE_DELAY = 1350;
+const DIALOGUE_DELAY = 2050;
 
 export default function Home() {
   const [chapter, setChapter] = useState<ChapterId>("cover");
@@ -529,31 +522,20 @@ export default function Home() {
   const answer = useMemo(() => scene.choices.find((item) => item.id === selectedChoice), [scene, selectedChoice]);
 
   useEffect(() => {
-    setComparePlaying(false);
-    setDialoguePlaying(false);
-    if (chapter === "compare") {
-      setCompareStep(0);
-      const timer = window.setTimeout(() => setComparePlaying(true), 650);
-      return () => window.clearTimeout(timer);
-    }
-    if (chapter === "dialogue") {
-      setDialogueStep(0);
-      const timer = window.setTimeout(() => setDialoguePlaying(true), 650);
-      return () => window.clearTimeout(timer);
-    }
-  }, [chapter, sceneIndex]);
-
-  useEffect(() => {
     if (!comparePlaying) return;
-    if (compareStep >= maxCompare) { setComparePlaying(false); return; }
-    const timer = window.setTimeout(() => setCompareStep((value) => value + 1), DIALOGUE_DELAY);
+    const timer = window.setTimeout(() => {
+      if (compareStep >= maxCompare) setComparePlaying(false);
+      else setCompareStep((value) => value + 1);
+    }, compareStep >= maxCompare ? 0 : DIALOGUE_DELAY);
     return () => window.clearTimeout(timer);
   }, [comparePlaying, compareStep, maxCompare]);
 
   useEffect(() => {
     if (!dialoguePlaying) return;
-    if (dialogueStep >= scene.right.length) { setDialoguePlaying(false); return; }
-    const timer = window.setTimeout(() => setDialogueStep((value) => value + 1), DIALOGUE_DELAY);
+    const timer = window.setTimeout(() => {
+      if (dialogueStep >= scene.right.length) setDialoguePlaying(false);
+      else setDialogueStep((value) => value + 1);
+    }, dialogueStep >= scene.right.length ? 0 : DIALOGUE_DELAY);
     return () => window.clearTimeout(timer);
   }, [dialoguePlaying, dialogueStep, scene.right.length]);
 
@@ -567,13 +549,23 @@ export default function Home() {
     setRoleSpeaker("a");
     setDrafts({ a: "", b: "" });
     setGuideOpen(0);
+    if (chapter === "compare") window.setTimeout(() => setComparePlaying(true), 700);
+    if (chapter === "dialogue") window.setTimeout(() => setDialoguePlaying(true), 700);
   };
 
   const goChapter = (next: ChapterId) => {
     setChapter(next);
     setComparePlaying(false);
     setDialoguePlaying(false);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    if (next === "compare") {
+      setCompareStep(0);
+      window.setTimeout(() => setComparePlaying(true), 700);
+    }
+    if (next === "dialogue") {
+      setDialogueStep(0);
+      window.setTimeout(() => setDialoguePlaying(true), 700);
+    }
+    window.scrollTo({ top: 0, behavior: "auto" });
     window.history.replaceState(null, "", next === "cover" ? "#kapak" : "#" + next);
   };
 
@@ -615,12 +607,13 @@ export default function Home() {
       {chapter === "cover" && (
         <section className="cover-page page-enter">
           <div className="cover-copy">
-            <p className="cover-kicker"><span>ETKİLEŞİMLİ KİTAPÇIK</span><i />7 gerçek durum · 4 bölüm</p>
-            <h1>Çatışma bir son değil.<br /><em>Toplumsal bir başlangıç.</em></h1>
-            <p className="cover-lead">6–12 yaş arasındaki <strong>İkinci Gelişim Evresi</strong> çocuğu, Maria Montessori’nin ifadesiyle “toplumsal alanda yeni doğmuş bir bebek” gibidir. Akran ilişkileri, kurallar, adalet ve ahlaki sorular onun doğal araştırma alanıdır.</p>
+            <p className="cover-kicker"><span>ETKİLEŞİMLİ MONTESSORİ KİTAPÇIĞI</span><i />7 gerçek durum · 4 bölüm</p>
+            <h1>Çatışmayı bitirme.<br /><em>Düşünmeyi başlat.</em></h1>
+            <p className="cover-lead">6–12 yaş arasındaki <strong>İkinci Gelişim Evresi</strong> çocuğu, Maria Montessori’nin bakışıyla toplumsal dünyayı yeni keşfeder. Kuralı yalnız uygulamak değil; adaleti, sınırı ve onarımı anlamak ister.</p>
+            <blockquote className="montessori-quote"><span>“</span><p>Çocuğun başarabileceğini hissettiği bir işte ona yardım etmeyin.</p><cite>— Maria Montessori</cite></blockquote>
             <div className="cover-principle">
-              <span className="principle-adult">YETİŞKİN</span>
-              <div><b>Yargıç değil, danışman.</b><p>Kararı dikte etmez; gözlemi söyler, soru sorar ve çocukların kendi çözümünü kurabilmesi için biraz geri çekilir.</p></div>
+              <span className="principle-adult">MONTESSORİ’DE YETİŞKİN</span>
+              <div><b>Yargıç değil, danışman.</b><p>Kararı dikte etmez; gözlemi söyler, açık soru sorar ve çocuğun kendi çözümünü kurabilmesi için geri çekilir.</p></div>
             </div>
             <button className="open-book-button" onClick={() => goChapter("compare")}>Kitabı aç <span>→</span></button>
           </div>
@@ -644,7 +637,7 @@ export default function Home() {
 
       {chapter === "compare" && (
         <section className="book-page compare-page page-enter" key={"compare-" + scene.id}>
-          <PageHeading number="01" eyebrow="BUNU YAPMA / BUNU YAP" title="Aynı olay, iki yetişkin tavrı." text="Sözleri oynatın; yaklaşım değiştiğinde çocukların muhakeme alanının nasıl değiştiğini görün." onHome={() => goChapter("cover")} />
+          <PageHeading number="01" eyebrow="BUNU YAPMA / BUNU YAP" title="Aynı olay, iki yetişkin tavrı." text="Montessori yaklaşımında yetişkinin sözü azalırken çocuğun muhakeme alanı büyür. Baloncukları oynatıp farkı görün." onHome={() => goChapter("cover")} />
           <ScenarioPicker sceneIndex={sceneIndex} onSelect={selectScene} />
           <article className="scenario-intro">
             <SceneVignette scene={scene} />
@@ -663,7 +656,7 @@ export default function Home() {
           <div className="play-controls">
             <button className="play-primary" onClick={toggleCompare}><span>{comparePlaying ? "Ⅱ" : compareStep >= maxCompare ? "↻" : "▶"}</span>{comparePlaying ? "Durdur" : compareStep >= maxCompare ? "Yeniden oynat" : compareStep > 0 ? "Devam et" : "Baştan oynat"}</button>
             <button className="play-secondary" disabled={compareStep >= maxCompare} onClick={() => { setComparePlaying(false); setCompareStep((value) => Math.min(maxCompare, value + 1)); }}>Sıradaki söz <span>→</span></button>
-            <div className={"auto-status " + (comparePlaying ? "running" : "paused")}><i />{comparePlaying ? "Otomatik akış · her söz 1,35 saniye" : compareStep > 0 && compareStep < maxCompare ? "Akış durduruldu · tek tek ilerleyebilirsiniz" : compareStep >= maxCompare ? "Diyalog tamamlandı" : "Sayfa açılınca otomatik başlar"}</div>
+            <div className={"auto-status " + (comparePlaying ? "running" : "paused")}><i />{comparePlaying ? "Otomatik akış · sakin Montessori temposu" : compareStep > 0 && compareStep < maxCompare ? "Akış durduruldu · tek tek ilerleyebilirsiniz" : compareStep >= maxCompare ? "Diyalog tamamlandı" : "Sayfa açılınca otomatik başlar"}</div>
             <div className="play-progress" aria-label={String(compareStep) + "/" + String(maxCompare) + " konuşma adımı"}><i style={{ width: String((compareStep / maxCompare) * 100) + "%" }} /></div>
           </div>
         </section>
@@ -676,7 +669,7 @@ export default function Home() {
           <div className="practice-layout">
             <aside className="thinking-ladder">
               <SceneVignette scene={scene} />
-              <small>MUHAKEME MERDİVENİ</small>
+              <small>MONTESSORİ MUHAKEME MERDİVENİ</small>
               <h2>{scene.title}</h2>
               {scene.thinking.map((item, index) => <div key={item}><span>{index + 1}</span><p>{item}</p></div>)}
               <p className="ladder-note">Cevabı ezberleme; düşüncenin nasıl kurulduğunu izle.</p>
@@ -690,7 +683,7 @@ export default function Home() {
                   </button>
                 ))}
               </div>
-              {answer && <div className="choice-feedback" aria-live="polite"><span>{answer.correct ? "Çözüm alanı açıldı" : "Bu yol biraz duvara çıktı"}</span><p>{answer.feedback}</p>{!answer.correct && <button onClick={() => setSelectedChoice(null)}>Başka bir cevap dene ↻</button>}</div>}
+              {answer && <div className="choice-feedback" aria-live="polite"><span>{answer.correct ? "Montessori çözüm alanı açıldı" : "Bu cümle muhakemeyi daraltıyor"}</span><p>{answer.feedback}</p>{!answer.correct && <button onClick={() => setSelectedChoice(null)}>Başka bir cevap dene ↻</button>}</div>}
             </article>
           </div>
         </section>
@@ -698,7 +691,7 @@ export default function Home() {
 
       {chapter === "dialogue" && (
         <section className="book-page dialogue-page page-enter" key={"dialogue-" + scene.id}>
-          <PageHeading number="03" eyebrow="DİYALOG KUR" title="Barış nesnesi kimdeyse söz onda." text="Önce örnek diyaloğu canlandırın; sonra iki çocuğun kendi cümlelerini kurup sözü birbirine devretmesine alan açın." onHome={() => goChapter("cover")} />
+          <PageHeading number="03" eyebrow="DİYALOG KUR" title="Barış nesnesi kimdeyse söz onda." text="Montessori Barış Masası’nda çocuk yetişkin hükmünü değil, arkadaşının bakışını duyar. Örneği oynatın; sonra sözü çocuklara bırakın." onHome={() => goChapter("cover")} />
           <ScenarioPicker sceneIndex={sceneIndex} onSelect={selectScene} />
           <div className="dialogue-theatre">
             <div className="theatre-stage" style={{ "--scene": scene.color } as React.CSSProperties}>
@@ -712,17 +705,17 @@ export default function Home() {
               <header><small>ÇÖZÜM DİYALOĞU · {sceneIndex + 1}/7</small><h2>{scene.title}</h2></header>
               <div className="script-window" aria-live="polite">
                 {dialogueStep === 0 && <div className="script-empty"><span>“</span><p>Örnek diyaloğu oynatın veya sözleri tek tek ilerletin.</p></div>}
-                {scene.right.map((line, index) => dialogueStep > index && <div className={"script-line line-" + line.speaker} key={index}><b>{speakerName(scene, line.speaker)}</b><p>{line.text}</p></div>)}
+                {scene.right.slice(Math.max(0, dialogueStep - 2), dialogueStep).map((line, index) => <div className={"script-line line-" + line.speaker} key={dialogueStep + "-" + index}><b>{speakerName(scene, line.speaker)}</b><p>{line.text}</p></div>)}
               </div>
               <div className="script-controls">
                 <button onClick={toggleDialogue}><span>{dialoguePlaying ? "Ⅱ" : dialogueStep >= scene.right.length ? "↻" : "▶"}</span>{dialoguePlaying ? "Durdur" : dialogueStep >= scene.right.length ? "Baştan oynat" : dialogueStep > 0 ? "Devam et" : "Baştan oynat"}</button>
                 <button disabled={dialogueStep >= scene.right.length} onClick={() => { setDialoguePlaying(false); setDialogueStep((value) => Math.min(scene.right.length, value + 1)); }}>Sıradaki konuşmacı →</button>
-                <div className={"auto-status " + (dialoguePlaying ? "running" : "paused")}><i />{dialoguePlaying ? "Otomatik diyalog akıyor · 1,35 saniye" : dialogueStep > 0 && dialogueStep < scene.right.length ? "Durduruldu · sıradaki konuşmacıya geçebilirsiniz" : dialogueStep >= scene.right.length ? "Diyalog tamamlandı" : "Sayfa açılınca otomatik başlar"}</div>
+                <div className={"auto-status " + (dialoguePlaying ? "running" : "paused")}><i />{dialoguePlaying ? "Otomatik diyalog · sakin Montessori temposu" : dialogueStep > 0 && dialogueStep < scene.right.length ? "Durduruldu · sıradaki konuşmacıya geçebilirsiniz" : dialogueStep >= scene.right.length ? "Diyalog tamamlandı" : "Sayfa açılınca otomatik başlar"}</div>
               </div>
             </div>
           </div>
           <div className="dialogue-workshop">
-            <header><div><small>KENDİ SÖZÜNÜ KUR</small><h2>Hazır cümleyi kopyalama; ihtiyacını açıkla.</h2></div><div className="formula"><span>GÖZLEM</span><i>+</i><span>DUYGU / İHTİYAÇ</span><i>+</i><span>RİCA</span></div></header>
+            <header><div><small>MONTESSORİ DİLİYLE · KENDİ SÖZÜNÜ KUR</small><h2>Hazır cümleyi kopyalama; ihtiyacını açıkla.</h2></div><div className="formula"><span>GÖZLEM</span><i>+</i><span>DUYGU / İHTİYAÇ</span><i>+</i><span>RİCA</span></div></header>
             <div className="speaker-toggle">
               <button className={roleSpeaker === "a" ? "active" : ""} onClick={() => setRoleSpeaker("a")}><span>{scene.names.a.slice(0, 1)}</span>{scene.names.a}</button>
               <button className="pass-object" onClick={() => setRoleSpeaker(roleSpeaker === "a" ? "b" : "a")}><span>✿</span><small>Sözü ver</small></button>
@@ -733,6 +726,7 @@ export default function Home() {
               <small>{scene.starters[roleSpeaker]}</small>
               <textarea rows={4} value={drafts[roleSpeaker]} onChange={(event) => setDrafts({ ...drafts, [roleSpeaker]: event.target.value })} placeholder={scene.names[roleSpeaker] + " kendi cümlesini buraya yazabilir…"} />
             </label>
+            <p className="workshop-note"><b>Montessori hatırlatması:</b> Yetişkin cümleyi tamamlamaz; gerekirse yalnızca “Bunu daha açık nasıl söyleyebilirsin?” diye sorar.</p>
           </div>
         </section>
       )}
@@ -743,7 +737,7 @@ export default function Home() {
           <ScenarioPicker sceneIndex={sceneIndex} onSelect={selectScene} />
           <div className="guide-lens">
             <div>
-              <small>YETİŞKİNİN MERCEĞİ</small>
+              <small>MONTESSORİ’DE YETİŞKİNİN MERCEĞİ</small>
               <h2>Aynı anda neyi büyütüyorsun?</h2>
               <p>Yetişkinin rolü küçüldükçe çocuğun aktif çabası için yer açılır.</p>
               <div className="lens-toggle">
