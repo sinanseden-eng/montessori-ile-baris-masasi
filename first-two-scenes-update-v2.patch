@@ -1,0 +1,435 @@
+diff --git a/.gitignore b/.gitignore
+new file mode 100644
+index 0000000..2533d86
+--- /dev/null
++++ b/.gitignore
+@@ -0,0 +1,9 @@
++node_modules/
++.next/
++out/
++
++.env*
++!.env.example
++
++.DS_Store
++*.log
+diff --git a/app/globals.css b/app/globals.css
+index e9be7c7..02c189c 100644
+--- a/app/globals.css
++++ b/app/globals.css
+@@ -279,9 +279,11 @@ button:focus-visible, textarea:focus-visible { outline: 3px solid rgba(242, 201,
+ .comparison-stage { position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: 26px; }
+ .versus-badge { position: absolute; z-index: 5; left: 50%; top: 48%; width: 34px; height: 34px; transform: translate(-50%,-50%); display: grid; place-items: center; border: 3px solid white; border-radius: 50%; color: var(--yellow); background: var(--navy); font-size: 9px; font-weight: 900; }
+ 
+-.dialogue-panel { min-height: 244px; padding: 12px; display: grid; grid-template-rows: auto auto 1fr auto; gap: 7px; border: 1px solid #dfe3e9; border-radius: 12px; background: rgba(255,255,255,.90); box-shadow: 0 8px 18px rgba(17,35,63,.06); }
++.dialogue-panel { min-height: 244px; padding: 12px; display: grid; grid-template-rows: auto auto 1fr auto; gap: 7px; border: 1px solid #dfe3e9; border-radius: 12px; background: rgba(255,255,255,.90); box-shadow: 0 8px 18px rgba(17,35,63,.06); transition: opacity .45s ease, filter .45s ease; }
+ .dialogue-panel.right { border-color: #e6d473; background: linear-gradient(rgba(255,255,255,.92), rgba(255,253,244,.92)); }
+ .dialogue-panel.wrong { border-color: var(--red-line); background: linear-gradient(rgba(255,255,255,.92), rgba(255,247,246,.92)); }
++.dialogue-panel.panel-active { opacity: 1; filter: none; }
++.dialogue-panel.panel-waiting { opacity: .66; filter: saturate(.72); }
+ .dialogue-panel > header { display: flex; gap: 9px; align-items: center; }
+ .approach-mark { width: 31px; height: 31px; display: grid; place-items: center; border-radius: 9px; color: white; background: var(--navy); font-weight: 900; }
+ .right .approach-mark { color: var(--navy); background: var(--yellow); }
+@@ -303,6 +305,115 @@ button:focus-visible, textarea:focus-visible { outline: 3px solid rgba(242, 201,
+ .speaker-token small { color: #788294; font-size: 7px; }
+ @keyframes speakerPulse { 50% { box-shadow: 0 0 0 5px rgba(242,201,76,.24); transform: scale(1.05); } }
+ 
++.dialogue-panel.illustrated {
++  min-height: 0;
++  grid-template-rows: auto auto auto;
++}
++
++.scene-stage {
++  position: relative;
++  isolation: isolate;
++  width: 100%;
++  aspect-ratio: 16 / 9;
++  overflow: hidden;
++  border: 1px solid #d9dee7;
++  border-radius: 11px;
++  background: #eef1f4;
++  box-shadow: inset 0 0 0 1px rgba(255,255,255,.5);
++}
++
++.dialogue-panel.wrong .scene-stage { border-color: var(--red-line); }
++.dialogue-panel.right .scene-stage { border-color: #e3cf65; }
++
++.scene-stage::after {
++  content: "";
++  position: absolute;
++  z-index: 1;
++  inset: 0;
++  pointer-events: none;
++  background:
++    linear-gradient(180deg, rgba(17,35,63,.02) 55%, rgba(17,35,63,.12) 100%),
++    linear-gradient(90deg, rgba(255,255,255,.05), transparent 22%, transparent 78%, rgba(17,35,63,.04));
++  box-shadow: inset 0 -22px 34px rgba(17,35,63,.06);
++}
++
++.scene-art {
++  position: absolute;
++  inset: 0;
++  width: 100%;
++  height: 100%;
++  display: block;
++  object-fit: cover;
++  object-position: center;
++  user-select: none;
++}
++
++.scene-bubble {
++  position: absolute;
++  z-index: 4;
++  top: 4%;
++  width: max-content;
++  max-width: min(67%, 370px);
++  padding: 10px 12px 11px;
++  border: 1px solid #d9dee7;
++  border-radius: 18px;
++  color: var(--navy);
++  background: rgba(255,255,255,.95);
++  box-shadow: 0 10px 24px rgba(17,35,63,.18);
++  backdrop-filter: blur(9px);
++  animation: sceneBubbleIn 1.1s cubic-bezier(.18,.8,.22,1) both;
++  transform-origin: 50% 100%;
++}
++.dialogue-panel.wrong .scene-bubble { border-color: #df9d93; background: rgba(255,248,247,.96); }
++.dialogue-panel.right .scene-bubble { border-color: #dbc04f; background: rgba(255,251,230,.96); }
++.scene-bubble b { display: block; margin-bottom: 4px; color: var(--navy); font-size: 8px; font-weight: 900; letter-spacing: .065em; text-transform: uppercase; }
++.scene-bubble p { margin: 0; color: #263f68; font-size: 10px; line-height: 1.38; }
++.scene-bubble::after {
++  content: "";
++  position: absolute;
++  bottom: -10px;
++  width: 18px;
++  height: 18px;
++  border-right: 1px solid #d9dee7;
++  border-bottom: 1px solid #d9dee7;
++  background: inherit;
++  transform: rotate(45deg) skew(7deg, 7deg);
++}
++.dialogue-panel.wrong .scene-bubble::after { border-color: #df9d93; }
++.dialogue-panel.right .scene-bubble::after { border-color: #dbc04f; }
++.bubble-a { right: 2.5%; border-radius: 18px 18px 5px 18px; }
++.bubble-a::after { right: 20%; }
++.bubble-b { left: 2.5%; border-radius: 18px 18px 18px 5px; }
++.bubble-b::after { left: 20%; }
++.bubble-teacher {
++  top: auto;
++  bottom: 4%;
++  left: 50%;
++  translate: -50% 0;
++  width: min(86%, 440px);
++  max-width: 86%;
++  border-radius: 18px 18px 8px 8px;
++  transform-origin: 50% 0;
++}
++.bubble-teacher::after {
++  top: -10px;
++  bottom: auto;
++  left: calc(50% - 9px);
++  transform: rotate(225deg) skew(7deg, 7deg);
++}
++
++/* İkinci görselde Selin solda, Ali sağda duruyor. */
++.scene-queue-right .bubble-a { right: auto; left: 2.5%; border-radius: 18px 18px 18px 5px; }
++.scene-queue-right .bubble-a::after { right: auto; left: 20%; }
++.scene-queue-right .bubble-b { right: 7%; left: auto; border-radius: 18px 18px 5px 18px; }
++.scene-queue-right .bubble-b::after { right: 20%; left: auto; }
++
++@keyframes sceneBubbleIn {
++  from { opacity: 0; transform: translateY(16px) scale(.86); filter: blur(2px); }
++  72% { opacity: 1; transform: translateY(-2px) scale(1.01); filter: blur(0); }
++  to { opacity: 1; transform: none; filter: blur(0); }
++}
++
+ .dialogue-stream { min-height: 106px; display: grid; place-items: center; overflow: hidden; }
+ .bubble { position: relative; width: min(94%, 450px); padding: 14px 16px; border: 1px solid #dbe0e8; border-radius: 18px 18px 18px 5px; background: rgba(248,249,251,.92); animation: bubbleIn .46s cubic-bezier(.2,.9,.28,1.25) both; }
+ .right .bubble { border-color: #e3cf65; background: var(--yellow-soft); }
+@@ -316,10 +427,6 @@ button:focus-visible, textarea:focus-visible { outline: 3px solid rgba(242, 201,
+ .bubble p { margin: 0; color: #2a4a80; font-size: 11px; line-height: 1.45; }
+ @keyframes bubbleIn { from { opacity: 0; transform: translateY(16px) scale(.88); border-radius: 50%; } to { opacity: 1; transform: none; } }
+ 
+-.dialogue-placeholder { color: #8690a0; text-align: center; }
+-.dialogue-placeholder span { color: var(--yellow); font-size: 25px; letter-spacing: .2em; }
+-.dialogue-placeholder p { margin: 3px 0 0; font-size: 9px; }
+-
+ .dialogue-result { min-height: 33px; padding: 6px 8px; display: flex; gap: 7px; align-items: center; border-radius: 8px; color: #5a6a8f; background: rgba(241,243,246,.9); opacity: .45; }
+ .dialogue-result.show { opacity: 1; }
+ .dialogue-result span { color: var(--navy); font-weight: 900; }
+@@ -530,9 +637,42 @@ button:focus-visible, textarea:focus-visible { outline: 3px solid rgba(242, 201,
+   .scenario-rail { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 2px; }
+   .scenario-rail button { flex: 0 0 94px; scroll-snap-align: start; }
+   .approach-summaries { grid-template-columns: 1fr; gap: 6px; }
+-  .comparison-stage { grid-template-columns: 1fr; gap: 10px; }
+-  .versus-badge { position: static; margin: -3px auto; transform: none; }
++  .comparison-stage {
++    grid-template-columns: 100% 100%;
++    grid-template-rows: auto;
++    gap: 0;
++    overflow: hidden;
++    perspective: 1200px;
++    border-radius: 12px;
++  }
++  .comparison-stage .dialogue-panel {
++    grid-row: 1;
++    width: 100%;
++    backface-visibility: hidden;
++    transition: transform .95s cubic-bezier(.22,.75,.2,1), opacity .65s ease, filter .65s ease;
++    will-change: transform;
++  }
++  .comparison-stage .dialogue-panel.wrong { grid-column: 1; transform-origin: right center; }
++  .comparison-stage .dialogue-panel.right { grid-column: 2; transform-origin: left center; }
++  .comparison-stage.phase-right .dialogue-panel.right { transform: translateX(-100%); }
++  .comparison-stage.phase-right .dialogue-panel.wrong { transform: translateX(-100%) rotateY(-5deg); }
++  .versus-badge { display: none; }
+   .dialogue-panel { min-height: 224px; }
++  .dialogue-panel.illustrated { min-height: 0; }
++  .scene-bubble,
++  .scene-queue-right .scene-bubble {
++    top: auto;
++    right: 8px;
++    bottom: 8px;
++    left: 8px;
++    translate: 0;
++    width: auto;
++    max-width: none;
++    padding: 9px 11px 10px;
++    border-radius: 15px 15px 7px 7px;
++  }
++  .scene-bubble::after { display: none; }
++  .scene-bubble p { font-size: 9px; line-height: 1.35; }
+   .play-controls { bottom: 58px; grid-template-columns: 1fr 1fr; }
+   .auto-status { grid-column: 1/-1; justify-self: center; }
+   .practice-layout, .guide-lens, .guide-content { grid-template-columns: 1fr; gap: 10px; }
+@@ -559,6 +699,9 @@ button:focus-visible, textarea:focus-visible { outline: 3px solid rgba(242, 201,
+   .scene-vignette { min-width: 62px; width: 62px; }
+   .approach-summaries p { font-size: 8.5px; }
+   .speaker-key > span { display: none; }
++  .scene-bubble { padding: 7px 9px 8px; }
++  .scene-bubble b { margin-bottom: 2px; font-size: 7px; }
++  .scene-bubble p { font-size: 8.4px; line-height: 1.3; }
+   .play-controls button { padding-inline: 8px; }
+   .thinking-ladder { padding: 14px; }
+   .thinking-ladder .scene-vignette { position: static; margin-bottom: 9px; }
+@@ -570,6 +713,6 @@ button:focus-visible, textarea:focus-visible { outline: 3px solid rgba(242, 201,
+ }
+ 
+ @media (prefers-reduced-motion: reduce) {
+-  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; }
++  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+   .backdrop-current { animation: none !important; }
+ }
+diff --git a/app/page.tsx b/app/page.tsx
+index b390376..3fc6606 100644
+--- a/app/page.tsx
++++ b/app/page.tsx
+@@ -53,8 +53,14 @@ const chapterBackgrounds: Record<ChapterId, string> = {
+ // SAHNE GÖRSELLERİ: Görseli hazır olan senaryoları buraya ekle.
+ // Görseli olmayan senaryolar otomatik olarak klasik baloncuk görünümüne döner.
+ const sceneImages: Record<string, { wrong: string; right: string }> = {
+-  stationery: { wrong: "/scenes/stationery-wrong.png", right: "/scenes/stationery-right.png" },
+-  // queue:    { wrong: "/scenes/queue-wrong.png",    right: "/scenes/queue-right.png" },
++  stationery: {
++    wrong: "/scenes/01-personal-property-dont.png",
++    right: "/scenes/01-personal-property-do.png",
++  },
++  queue: {
++    wrong: "/scenes/02-fountain-queue-dont.png",
++    right: "/scenes/02-fountain-queue-do.png",
++  },
+   // rules:    { wrong: "/scenes/rules-wrong.png",    right: "/scenes/rules-right.png" },
+   // teams:    { wrong: "/scenes/teams-wrong.png",    right: "/scenes/teams-right.png" },
+   // swing:    { wrong: "/scenes/swing-wrong.png",    right: "/scenes/swing-right.png" },
+@@ -69,17 +75,17 @@ const scenarios: Scenario[] = [
+     icon: "✎",
+     color: "#ff7a6b",
+     title: "Kırtasiye ve özel eşya sahipliği",
+-    context: "Efe, Can’ın özel boya setini izin almadan kullandı ve yeşil kalemi kırdı.",
+-    names: { a: "Can", b: "Efe" },
++    context: "Efe, Elif’in özel boya setini izin almadan kullandı ve yeşil kalemi kırdı.",
++    names: { a: "Elif", b: "Efe" },
+     wrongApproach: "“Sınıfta her şey ortaktır” diyerek zoraki paylaşım istemek; cezayı ve yasağı yetişkinin belirlemesi.",
+     rightApproach: "Kişisel mülkiyet sınırını görünür kılmak; zararı, duyguyu ve onarımı Barış Masası’nda çocukların konuşmasına alan açmak.",
+     wrong: [
+-      { speaker: "teacher", text: "Can, paylaşmalısın. Sınıfta her şey ortaktır!" },
+-      { speaker: "teacher", text: "Efe, bir daha Can’ın eşyalarına dokunmayacaksın." },
++      { speaker: "teacher", text: "Elif, paylaşmalısın. Sınıfta her şey ortaktır!" },
++      { speaker: "teacher", text: "Efe, bir daha Elif’in eşyalarına dokunmayacaksın." },
+       { speaker: "a", text: "Ama kırılan kalemim hâlâ kırık…" },
+     ],
+     right: [
+-      { speaker: "teacher", text: "Can’ın kalemleri izinsiz alındığı için canının sıkıldığını görüyorum. Barış Masası’nda konuşmak ister misiniz?" },
++      { speaker: "teacher", text: "Elif’in kalemleri izinsiz alındığı için canının sıkıldığını görüyorum. Barış Masası’nda konuşmak ister misiniz?" },
+       { speaker: "a", text: "İzin almadan kullandığında ve yeşil kalem kırıldığında öfkelendim. Önce bana sormanı istiyorum." },
+       { speaker: "b", text: "O yeşil tonu beğendiğim için aceleyle aldım. Kırmak istememiştim." },
+       { speaker: "b", text: "Bir dahaki sefere soracağım. Kalemi onarmak için ne yapabilirim?" },
+@@ -89,7 +95,7 @@ const scenarios: Scenario[] = [
+     rightResult: "Sınır açıklandı, sorumluluk alındı ve somut bir onarım yolu bulundu.",
+     question: "Efe sorumluluk alan bir cevap vermek istiyor. Hangisi çözüm alanı açar?",
+     choices: [
+-      { id: "a", text: "Herkes kullanıyordu; yalnızca ben yapmadım.", correct: false, feedback: "Sorumluluğu dağıtmak, Can’ın sınırını ve kırılan kalemi görünmez bırakır." },
++      { id: "a", text: "Herkes kullanıyordu; yalnızca ben yapmadım.", correct: false, feedback: "Sorumluluğu dağıtmak, Elif’in sınırını ve kırılan kalemi görünmez bırakır." },
+       { id: "b", text: "İzin almadan aldım. Üzgünüm; onarmana yardım edip bir daha önce soracağım.", correct: true, feedback: "Eylem kabul ediliyor, sınır duyuluyor ve onarım öneriliyor." },
+       { id: "c", text: "O kadar değerliyse okula getirmeseydin.", correct: false, feedback: "Bu cümle sorumluluğu eşyanın sahibine yükler." },
+     ],
+@@ -485,47 +491,37 @@ function ScenarioPicker({ sceneIndex, onSelect }: { sceneIndex: number; onSelect
+   );
+ }
+ 
+-function DialoguePanel({ kind, scene, step }: { kind: "wrong" | "right"; scene: Scenario; step: number }) {
++function DialoguePanel({ kind, scene, step, isActive }: { kind: "wrong" | "right"; scene: Scenario; step: number; isActive: boolean }) {
+   const lines = scene[kind];
+   const good = kind === "right";
+-  const activeSpeaker = step > 0 ? lines[Math.min(step - 1, lines.length - 1)]?.speaker : undefined;
+-  const activeLine = step > 0 ? lines[Math.min(step - 1, lines.length - 1)] : undefined;
++  const activeSpeaker = isActive && step > 0 ? lines[Math.min(step - 1, lines.length - 1)]?.speaker : undefined;
++  const activeLine = isActive && step > 0 ? lines[Math.min(step - 1, lines.length - 1)] : undefined;
+   const art = sceneImages[scene.id];
+ 
+   return (
+-    <article className={"dialogue-panel " + kind}>
++    <article className={"dialogue-panel " + kind + (art ? " illustrated" : "") + (isActive ? " panel-active" : " panel-waiting")}>
+       <header>
+         <span className="approach-mark">{good ? "✓" : "×"}</span>
+         <div><small>{good ? "BUNU YAP" : "BUNU YAPMA"}</small><h3>{good ? "Danışmanlık alan açar" : "Yargıçlık kararı kapatır"}</h3></div>
+       </header>
+-      <div className="speaker-key" style={{ "--scene": scene.color } as React.CSSProperties}>
+-        <CartoonCharacter role={activeSpeaker || "teacher"} name={activeSpeaker ? speakerName(scene, activeSpeaker).split(" · ")[0] : "Montessori"} active mood={good ? "calm" : "tense"} />
+-        <span>{good ? "Gözlem → soru → geri çekilme" : "Hüküm → emir → bağımlılık"}</span>
+-      </div>
++      {!art && (
++        <div className="speaker-key" style={{ "--scene": scene.color } as React.CSSProperties}>
++          <CartoonCharacter role={activeSpeaker || "teacher"} name={activeSpeaker ? speakerName(scene, activeSpeaker).split(" · ")[0] : "Montessori"} active mood={good ? "calm" : "tense"} />
++          <span>{good ? "Gözlem → soru → geri çekilme" : "Hüküm → emir → bağımlılık"}</span>
++        </div>
++      )}
+ 
+       {art ? (
+         <div className={"scene-stage scene-" + scene.id + "-" + kind} aria-live="polite">
+           <img className="scene-art" src={art[kind]} alt={scene.title + (good ? " — danışman yaklaşım sahnesi" : " — yargıç yaklaşım sahnesi")} />
+-          {!activeLine && <div className="scene-hint"><span>•••</span><p>Baloncuklar birazdan konuşacak.</p></div>}
+-          {activeLine && activeLine.speaker === "a" && (
+-            <div className="scene-bubble bubble-a" key={kind + "-" + step}>
+-              <b>{scene.names.a}</b><p>{activeLine.text}</p>
+-            </div>
+-          )}
+-          {activeLine && activeLine.speaker === "b" && (
+-            <div className="scene-bubble bubble-b" key={kind + "-" + step}>
+-              <b>{scene.names.b}</b><p>{activeLine.text}</p>
+-            </div>
+-          )}
+-          {activeLine && activeLine.speaker === "teacher" && (
+-            <div className="scene-caption" key={kind + "-" + step}>
+-              <b>{speakerName(scene, "teacher")}</b><p>{activeLine.text}</p>
++          {activeLine && (
++            <div className={"scene-bubble bubble-" + activeLine.speaker} key={kind + "-" + step}>
++              <b>{speakerName(scene, activeLine.speaker)}</b><p>{activeLine.text}</p>
+             </div>
+           )}
+         </div>
+       ) : (
+         <div className="dialogue-stream" aria-live="polite">
+-          {!activeLine && <div className="dialogue-placeholder"><span>•••</span><p>Baloncuklar birazdan konuşacak.</p></div>}
+           {activeLine && <div className={"bubble speaker-" + activeLine.speaker} key={kind + "-" + step}>
+             <b>{speakerName(scene, activeLine.speaker)}</b><p>{activeLine.text}</p>
+           </div>}
+@@ -549,7 +545,9 @@ function PageHeading({ number, eyebrow, title, text, onHome }: { number: string;
+   );
+ }
+ 
+-const DIALOGUE_DELAY = 2050;
++// Yaklaşımlar sırayla oynar; her söz ve altındaki sonuç notu sakin bir
++// Montessori temposunda okunabilecek kadar ekranda kalır.
++const DIALOGUE_DELAY = 6200;
+ 
+ export default function Home() {
+   const [chapter, setChapter] = useState<ChapterId>("cover");
+@@ -566,19 +564,23 @@ export default function Home() {
+   const [guideLens, setGuideLens] = useState<"judge" | "advisor">("advisor");
+ 
+   const scene = scenarios[sceneIndex];
+-  const maxCompare = Math.max(scene.wrong.length, scene.right.length);
++  const maxCompare = scene.wrong.length + scene.right.length;
++  const rightCompareStarted = compareStep > scene.wrong.length;
++  const wrongCompareStep = Math.min(compareStep, scene.wrong.length);
++  const rightCompareStep = Math.max(0, Math.min(compareStep - scene.wrong.length, scene.right.length));
+   const answer = useMemo(() => scene.choices.find((item) => item.id === selectedChoice), [scene, selectedChoice]);
+ 
+   useEffect(() => {
++    const activeSceneImages = sceneImages[scene.id];
+     const sources = [
+       ...Object.values(chapterBackgrounds),
+-      ...Object.values(sceneImages).flatMap((pair) => [pair.wrong, pair.right]),
++      ...(activeSceneImages ? [activeSceneImages.wrong, activeSceneImages.right] : []),
+     ];
+     sources.forEach((source) => {
+       const image = new window.Image();
+       image.src = source;
+     });
+-  }, []);
++  }, [scene.id]);
+ 
+   useEffect(() => {
+     if (!comparePlaying) return;
+@@ -608,8 +610,8 @@ export default function Home() {
+     setRoleSpeaker("a");
+     setDrafts({ a: "", b: "" });
+     setGuideOpen(0);
+-    if (chapter === "compare") window.setTimeout(() => setComparePlaying(true), 700);
+-    if (chapter === "dialogue") window.setTimeout(() => setDialoguePlaying(true), 700);
++    if (chapter === "compare") window.setTimeout(() => { setCompareStep(1); setComparePlaying(true); }, 700);
++    if (chapter === "dialogue") window.setTimeout(() => { setDialogueStep(1); setDialoguePlaying(true); }, 700);
+   };
+ 
+   const goChapter = (next: ChapterId) => {
+@@ -619,11 +621,11 @@ export default function Home() {
+     setDialoguePlaying(false);
+     if (next === "compare") {
+       setCompareStep(0);
+-      window.setTimeout(() => setComparePlaying(true), 700);
++      window.setTimeout(() => { setCompareStep(1); setComparePlaying(true); }, 700);
+     }
+     if (next === "dialogue") {
+       setDialogueStep(0);
+-      window.setTimeout(() => setDialoguePlaying(true), 700);
++      window.setTimeout(() => { setDialogueStep(1); setDialoguePlaying(true); }, 700);
+     }
+     window.scrollTo({ top: 0, behavior: "auto" });
+     window.history.replaceState(null, "", next === "cover" ? "#kapak" : "#" + next);
+@@ -631,13 +633,13 @@ export default function Home() {
+ 
+   const toggleCompare = () => {
+     if (comparePlaying) { setComparePlaying(false); return; }
+-    if (compareStep >= maxCompare) setCompareStep(0);
++    if (compareStep === 0 || compareStep >= maxCompare) setCompareStep(1);
+     setComparePlaying(true);
+   };
+ 
+   const toggleDialogue = () => {
+     if (dialoguePlaying) { setDialoguePlaying(false); return; }
+-    if (dialogueStep >= scene.right.length) setDialogueStep(0);
++    if (dialogueStep === 0 || dialogueStep >= scene.right.length) setDialogueStep(1);
+     setDialoguePlaying(true);
+   };
+ 
+@@ -724,15 +726,15 @@ export default function Home() {
+             <article className="summary-wrong"><span>×</span><div><small>BUNU YAPMA</small><p>{scene.wrongApproach}</p></div></article>
+             <article className="summary-right"><span>✓</span><div><small>BUNU YAP</small><p>{scene.rightApproach}</p></div></article>
+           </div>
+-          <div className="comparison-stage">
+-            <DialoguePanel kind="wrong" scene={scene} step={compareStep} />
++          <div className={"comparison-stage phase-" + (rightCompareStarted ? "right" : "wrong")}>
++            <DialoguePanel kind="wrong" scene={scene} step={wrongCompareStep} isActive={!rightCompareStarted} />
+             <div className="versus-badge">VS</div>
+-            <DialoguePanel kind="right" scene={scene} step={compareStep} />
++            <DialoguePanel kind="right" scene={scene} step={rightCompareStep} isActive={rightCompareStarted} />
+           </div>
+           <div className="play-controls">
+             <button className="play-primary" onClick={toggleCompare}><span>{comparePlaying ? "Ⅱ" : compareStep >= maxCompare ? "↻" : "▶"}</span>{comparePlaying ? "Durdur" : compareStep >= maxCompare ? "Yeniden oynat" : compareStep > 0 ? "Devam et" : "Baştan oynat"}</button>
+             <button className="play-secondary" disabled={compareStep >= maxCompare} onClick={() => { setComparePlaying(false); setCompareStep((value) => Math.min(maxCompare, value + 1)); }}>Sıradaki söz <span>→</span></button>
+-            <div className={"auto-status " + (comparePlaying ? "running" : "paused")}><i />{comparePlaying ? "Otomatik akış · sakin Montessori temposu" : compareStep > 0 && compareStep < maxCompare ? "Akış durduruldu · tek tek ilerleyebilirsiniz" : compareStep >= maxCompare ? "Diyalog tamamlandı" : "Sayfa açılınca otomatik başlar"}</div>
++            <div className={"auto-status " + (comparePlaying ? "running" : "paused")}><i />{comparePlaying ? "Otomatik akış · " + (rightCompareStarted ? "Bunu Yap oynuyor" : "Bunu Yapma oynuyor") : compareStep > 0 && compareStep < maxCompare ? "Akış durduruldu · tek tek ilerleyebilirsiniz" : compareStep >= maxCompare ? "Diyalog tamamlandı" : "Sayfa açılınca otomatik başlar"}</div>
+             <div className="play-progress" aria-label={String(compareStep) + "/" + String(maxCompare) + " konuşma adımı"}><i style={{ width: String((compareStep / maxCompare) * 100) + "%" }} /></div>
+           </div>
+         </section>

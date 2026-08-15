@@ -1,40 +1,34 @@
-# İlk İki Resimli Senaryo Güncellemesi
+# İlk İki Resimli Senaryo — Güncelleme 2
 
 Bu paket, `sinanseden-eng/montessori-ile-baris-masasi` deposunun güncel `main` dalı için hazırlanmıştır.
 
 ## GitHub web arayüzünde uygulama
 
-1. Depoda `app/page.tsx` dosyasını açın ve içeriğini bu paketteki `app/page.tsx` ile değiştirin.
-2. `app/globals.css` dosyasını açın ve içeriğini bu paketteki `app/globals.css` ile değiştirin.
-3. Depo kökünde `.gitignore` yoksa paketteki `.gitignore` dosyasını oluşturun. Varsa içeriğini karşılaştırarak gerekli satırları ekleyin.
-4. Dört PNG'nin `public/scenes` altında şu adlarla bulunduğunu doğrulayın:
-   - `01-personal-property-dont.png`
-   - `01-personal-property-do.png`
-   - `02-fountain-queue-dont.png`
-   - `02-fountain-queue-do.png`
-5. Değişiklikleri `feat: add first two illustrated conflict scenes` mesajıyla kaydedin.
+1. Depoda `app/page.tsx` dosyasını açın ve içeriğini bu paketteki `app/page.tsx` ile tamamen değiştirin.
+2. `app/globals.css` dosyasını açın ve içeriğini bu paketteki `app/globals.css` ile tamamen değiştirin.
+3. Depo kökünde `.gitignore` bulunmuyorsa paketteki `.gitignore` dosyasını oluşturun.
+4. `public/scenes` klasöründeki dört PNG'yi değiştirmeyin; bu güncelleme mevcut görselleri kullanır.
+5. Değişiklikleri örneğin `fix: refine illustrated scenario playback` mesajıyla kaydedin.
 
-## Git ile tek seferde uygulama
+## Bilgisayarda Git ile uygulama
 
-Depoyu bilgisayarınıza klonladıysanız paket içindeki `.patch` dosyasını depo kökünde şu komutla uygulayabilirsiniz:
+Patch dosyasını depo köküne kopyalayın ve değişiklikleri çalışma alanına alın:
 
 ```bash
-git am 0001-feat-add-first-two-illustrated-conflict-scenes.patch
-```
-
-Ardından:
-
-```bash
+git apply first-two-scenes-update-v2.patch
 npm ci
 npm run build
+git add -- .gitignore app/page.tsx app/globals.css
+git commit -m "fix: refine illustrated scenario playback"
 git push
 ```
 
-## Güncellemenin kapsamı
+## Bu sürümde neler değişti?
 
-- İlk iki senaryo dört çizime bağlanır.
-- Öğretmen ve çocukların konuşmaları görsel üzerinde dinamik baloncuklarla gösterilir.
-- Her söz yaklaşık 4,8 saniye ekranda kalır; baloncuklar 1,1 saniyelik yumuşak animasyonla belirir.
-- Durdurma ve tek tek ilerletme kontrolleri korunur.
-- Mobil yerleşim uyarlanır.
-- Diğer beş senaryo mevcut klasik görünümünü korur.
+- İlk senaryodaki kızın adı bütün ilgili metinlerde `Elif` olarak düzeltildi.
+- “Baloncuklar birazdan konuşacak” bekleme mesajı kaldırıldı.
+- `Bunu Yapma` diyaloğu tamamen bittikten sonra `Bunu Yap` diyaloğu başlar.
+- Her söz 6,2 saniye ekranda kalır; böylece alt sonuç notu rahatça okunabilir.
+- Mobil görünümde iki yaklaşım aynı anda üst üste gösterilmez; ikinci yaklaşım yatay kitap sayfası geçişiyle gelir.
+- Durdurma ve `Sıradaki söz` kontrolleri korunur.
+- İkinci senaryonun içeriği değiştirilmedi.

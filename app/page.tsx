@@ -75,17 +75,17 @@ const scenarios: Scenario[] = [
     icon: "✎",
     color: "#ff7a6b",
     title: "Kırtasiye ve özel eşya sahipliği",
-    context: "Efe, Can’ın özel boya setini izin almadan kullandı ve yeşil kalemi kırdı.",
-    names: { a: "Can", b: "Efe" },
+    context: "Efe, Elif’in özel boya setini izin almadan kullandı ve yeşil kalemi kırdı.",
+    names: { a: "Elif", b: "Efe" },
     wrongApproach: "“Sınıfta her şey ortaktır” diyerek zoraki paylaşım istemek; cezayı ve yasağı yetişkinin belirlemesi.",
     rightApproach: "Kişisel mülkiyet sınırını görünür kılmak; zararı, duyguyu ve onarımı Barış Masası’nda çocukların konuşmasına alan açmak.",
     wrong: [
-      { speaker: "teacher", text: "Can, paylaşmalısın. Sınıfta her şey ortaktır!" },
-      { speaker: "teacher", text: "Efe, bir daha Can’ın eşyalarına dokunmayacaksın." },
+      { speaker: "teacher", text: "Elif, paylaşmalısın. Sınıfta her şey ortaktır!" },
+      { speaker: "teacher", text: "Efe, bir daha Elif’in eşyalarına dokunmayacaksın." },
       { speaker: "a", text: "Ama kırılan kalemim hâlâ kırık…" },
     ],
     right: [
-      { speaker: "teacher", text: "Can’ın kalemleri izinsiz alındığı için canının sıkıldığını görüyorum. Barış Masası’nda konuşmak ister misiniz?" },
+      { speaker: "teacher", text: "Elif’in kalemleri izinsiz alındığı için canının sıkıldığını görüyorum. Barış Masası’nda konuşmak ister misiniz?" },
       { speaker: "a", text: "İzin almadan kullandığında ve yeşil kalem kırıldığında öfkelendim. Önce bana sormanı istiyorum." },
       { speaker: "b", text: "O yeşil tonu beğendiğim için aceleyle aldım. Kırmak istememiştim." },
       { speaker: "b", text: "Bir dahaki sefere soracağım. Kalemi onarmak için ne yapabilirim?" },
@@ -95,7 +95,7 @@ const scenarios: Scenario[] = [
     rightResult: "Sınır açıklandı, sorumluluk alındı ve somut bir onarım yolu bulundu.",
     question: "Efe sorumluluk alan bir cevap vermek istiyor. Hangisi çözüm alanı açar?",
     choices: [
-      { id: "a", text: "Herkes kullanıyordu; yalnızca ben yapmadım.", correct: false, feedback: "Sorumluluğu dağıtmak, Can’ın sınırını ve kırılan kalemi görünmez bırakır." },
+      { id: "a", text: "Herkes kullanıyordu; yalnızca ben yapmadım.", correct: false, feedback: "Sorumluluğu dağıtmak, Elif’in sınırını ve kırılan kalemi görünmez bırakır." },
       { id: "b", text: "İzin almadan aldım. Üzgünüm; onarmana yardım edip bir daha önce soracağım.", correct: true, feedback: "Eylem kabul ediliyor, sınır duyuluyor ve onarım öneriliyor." },
       { id: "c", text: "O kadar değerliyse okula getirmeseydin.", correct: false, feedback: "Bu cümle sorumluluğu eşyanın sahibine yükler." },
     ],
@@ -491,15 +491,15 @@ function ScenarioPicker({ sceneIndex, onSelect }: { sceneIndex: number; onSelect
   );
 }
 
-function DialoguePanel({ kind, scene, step }: { kind: "wrong" | "right"; scene: Scenario; step: number }) {
+function DialoguePanel({ kind, scene, step, isActive }: { kind: "wrong" | "right"; scene: Scenario; step: number; isActive: boolean }) {
   const lines = scene[kind];
   const good = kind === "right";
-  const activeSpeaker = step > 0 ? lines[Math.min(step - 1, lines.length - 1)]?.speaker : undefined;
-  const activeLine = step > 0 ? lines[Math.min(step - 1, lines.length - 1)] : undefined;
+  const activeSpeaker = isActive && step > 0 ? lines[Math.min(step - 1, lines.length - 1)]?.speaker : undefined;
+  const activeLine = isActive && step > 0 ? lines[Math.min(step - 1, lines.length - 1)] : undefined;
   const art = sceneImages[scene.id];
 
   return (
-    <article className={"dialogue-panel " + kind + (art ? " illustrated" : "")}>
+    <article className={"dialogue-panel " + kind + (art ? " illustrated" : "") + (isActive ? " panel-active" : " panel-waiting")}>
       <header>
         <span className="approach-mark">{good ? "✓" : "×"}</span>
         <div><small>{good ? "BUNU YAP" : "BUNU YAPMA"}</small><h3>{good ? "Danışmanlık alan açar" : "Yargıçlık kararı kapatır"}</h3></div>
@@ -514,7 +514,6 @@ function DialoguePanel({ kind, scene, step }: { kind: "wrong" | "right"; scene: 
       {art ? (
         <div className={"scene-stage scene-" + scene.id + "-" + kind} aria-live="polite">
           <img className="scene-art" src={art[kind]} alt={scene.title + (good ? " — danışman yaklaşım sahnesi" : " — yargıç yaklaşım sahnesi")} />
-          {!activeLine && <div className="scene-hint"><span>•••</span><p>Baloncuklar birazdan konuşacak.</p></div>}
           {activeLine && (
             <div className={"scene-bubble bubble-" + activeLine.speaker} key={kind + "-" + step}>
               <b>{speakerName(scene, activeLine.speaker)}</b><p>{activeLine.text}</p>
@@ -523,7 +522,6 @@ function DialoguePanel({ kind, scene, step }: { kind: "wrong" | "right"; scene: 
         </div>
       ) : (
         <div className="dialogue-stream" aria-live="polite">
-          {!activeLine && <div className="dialogue-placeholder"><span>•••</span><p>Baloncuklar birazdan konuşacak.</p></div>}
           {activeLine && <div className={"bubble speaker-" + activeLine.speaker} key={kind + "-" + step}>
             <b>{speakerName(scene, activeLine.speaker)}</b><p>{activeLine.text}</p>
           </div>}
@@ -547,9 +545,9 @@ function PageHeading({ number, eyebrow, title, text, onHome }: { number: string;
   );
 }
 
-// Her söz, iki yaklaşım yan yana okunabilsin ve iletişim sindirilebilsin diye
-// sakin bir Montessori temposunda ekranda kalır.
-const DIALOGUE_DELAY = 4800;
+// Yaklaşımlar sırayla oynar; her söz ve altındaki sonuç notu sakin bir
+// Montessori temposunda okunabilecek kadar ekranda kalır.
+const DIALOGUE_DELAY = 6200;
 
 export default function Home() {
   const [chapter, setChapter] = useState<ChapterId>("cover");
@@ -566,7 +564,10 @@ export default function Home() {
   const [guideLens, setGuideLens] = useState<"judge" | "advisor">("advisor");
 
   const scene = scenarios[sceneIndex];
-  const maxCompare = Math.max(scene.wrong.length, scene.right.length);
+  const maxCompare = scene.wrong.length + scene.right.length;
+  const rightCompareStarted = compareStep > scene.wrong.length;
+  const wrongCompareStep = Math.min(compareStep, scene.wrong.length);
+  const rightCompareStep = Math.max(0, Math.min(compareStep - scene.wrong.length, scene.right.length));
   const answer = useMemo(() => scene.choices.find((item) => item.id === selectedChoice), [scene, selectedChoice]);
 
   useEffect(() => {
@@ -609,8 +610,8 @@ export default function Home() {
     setRoleSpeaker("a");
     setDrafts({ a: "", b: "" });
     setGuideOpen(0);
-    if (chapter === "compare") window.setTimeout(() => setComparePlaying(true), 700);
-    if (chapter === "dialogue") window.setTimeout(() => setDialoguePlaying(true), 700);
+    if (chapter === "compare") window.setTimeout(() => { setCompareStep(1); setComparePlaying(true); }, 700);
+    if (chapter === "dialogue") window.setTimeout(() => { setDialogueStep(1); setDialoguePlaying(true); }, 700);
   };
 
   const goChapter = (next: ChapterId) => {
@@ -620,11 +621,11 @@ export default function Home() {
     setDialoguePlaying(false);
     if (next === "compare") {
       setCompareStep(0);
-      window.setTimeout(() => setComparePlaying(true), 700);
+      window.setTimeout(() => { setCompareStep(1); setComparePlaying(true); }, 700);
     }
     if (next === "dialogue") {
       setDialogueStep(0);
-      window.setTimeout(() => setDialoguePlaying(true), 700);
+      window.setTimeout(() => { setDialogueStep(1); setDialoguePlaying(true); }, 700);
     }
     window.scrollTo({ top: 0, behavior: "auto" });
     window.history.replaceState(null, "", next === "cover" ? "#kapak" : "#" + next);
@@ -632,13 +633,13 @@ export default function Home() {
 
   const toggleCompare = () => {
     if (comparePlaying) { setComparePlaying(false); return; }
-    if (compareStep >= maxCompare) setCompareStep(0);
+    if (compareStep === 0 || compareStep >= maxCompare) setCompareStep(1);
     setComparePlaying(true);
   };
 
   const toggleDialogue = () => {
     if (dialoguePlaying) { setDialoguePlaying(false); return; }
-    if (dialogueStep >= scene.right.length) setDialogueStep(0);
+    if (dialogueStep === 0 || dialogueStep >= scene.right.length) setDialogueStep(1);
     setDialoguePlaying(true);
   };
 
@@ -725,15 +726,15 @@ export default function Home() {
             <article className="summary-wrong"><span>×</span><div><small>BUNU YAPMA</small><p>{scene.wrongApproach}</p></div></article>
             <article className="summary-right"><span>✓</span><div><small>BUNU YAP</small><p>{scene.rightApproach}</p></div></article>
           </div>
-          <div className="comparison-stage">
-            <DialoguePanel kind="wrong" scene={scene} step={compareStep} />
+          <div className={"comparison-stage phase-" + (rightCompareStarted ? "right" : "wrong")}>
+            <DialoguePanel kind="wrong" scene={scene} step={wrongCompareStep} isActive={!rightCompareStarted} />
             <div className="versus-badge">VS</div>
-            <DialoguePanel kind="right" scene={scene} step={compareStep} />
+            <DialoguePanel kind="right" scene={scene} step={rightCompareStep} isActive={rightCompareStarted} />
           </div>
           <div className="play-controls">
             <button className="play-primary" onClick={toggleCompare}><span>{comparePlaying ? "Ⅱ" : compareStep >= maxCompare ? "↻" : "▶"}</span>{comparePlaying ? "Durdur" : compareStep >= maxCompare ? "Yeniden oynat" : compareStep > 0 ? "Devam et" : "Baştan oynat"}</button>
             <button className="play-secondary" disabled={compareStep >= maxCompare} onClick={() => { setComparePlaying(false); setCompareStep((value) => Math.min(maxCompare, value + 1)); }}>Sıradaki söz <span>→</span></button>
-            <div className={"auto-status " + (comparePlaying ? "running" : "paused")}><i />{comparePlaying ? "Otomatik akış · sakin Montessori temposu" : compareStep > 0 && compareStep < maxCompare ? "Akış durduruldu · tek tek ilerleyebilirsiniz" : compareStep >= maxCompare ? "Diyalog tamamlandı" : "Sayfa açılınca otomatik başlar"}</div>
+            <div className={"auto-status " + (comparePlaying ? "running" : "paused")}><i />{comparePlaying ? "Otomatik akış · " + (rightCompareStarted ? "Bunu Yap oynuyor" : "Bunu Yapma oynuyor") : compareStep > 0 && compareStep < maxCompare ? "Akış durduruldu · tek tek ilerleyebilirsiniz" : compareStep >= maxCompare ? "Diyalog tamamlandı" : "Sayfa açılınca otomatik başlar"}</div>
             <div className="play-progress" aria-label={String(compareStep) + "/" + String(maxCompare) + " konuşma adımı"}><i style={{ width: String((compareStep / maxCompare) * 100) + "%" }} /></div>
           </div>
         </section>
