@@ -47,6 +47,7 @@ Sonraki GitHub güncellemeleri Netlify'da otomatik olarak yeniden yayınlanır.
 - `app/page.tsx`: Kitabın içeriği ve bütün etkileşimler
 - `app/globals.css`: Flipbook düzeni, konuşma baloncukları ve sayfa animasyonları
 - `app/layout.tsx`: Sayfa başlığı ve açıklaması
+- `public/backgrounds/`: Kapak ve dört bölüm için fotogerçekçi Montessori arka planları
 - `netlify.toml`: Netlify derleme ve yayın ayarları
 
 ## Üretim derlemesini denetleme

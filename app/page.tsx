@@ -41,6 +41,14 @@ const chapters: { id: Exclude<ChapterId, "cover">; number: string; title: string
   { id: "guide", number: "04", title: "Öğretmen Rehberi", subtitle: "Yargıç değil, danışman ol", icon: "⌁" },
 ];
 
+const chapterBackgrounds: Record<ChapterId, string> = {
+  cover: "/backgrounds/bg-cover.png",
+  compare: "/backgrounds/bg-compare.png",
+  practice: "/backgrounds/bg-practice.png",
+  dialogue: "/backgrounds/bg-dialogue.png",
+  guide: "/backgrounds/bg-guide.png",
+};
+
 const scenarios: Scenario[] = [
   {
     id: "stationery",
@@ -506,6 +514,7 @@ const DIALOGUE_DELAY = 2050;
 
 export default function Home() {
   const [chapter, setChapter] = useState<ChapterId>("cover");
+  const [previousChapter, setPreviousChapter] = useState<ChapterId | null>(null);
   const [sceneIndex, setSceneIndex] = useState(0);
   const [compareStep, setCompareStep] = useState(0);
   const [comparePlaying, setComparePlaying] = useState(false);
@@ -520,6 +529,13 @@ export default function Home() {
   const scene = scenarios[sceneIndex];
   const maxCompare = Math.max(scene.wrong.length, scene.right.length);
   const answer = useMemo(() => scene.choices.find((item) => item.id === selectedChoice), [scene, selectedChoice]);
+
+  useEffect(() => {
+    Object.values(chapterBackgrounds).forEach((source) => {
+      const image = new window.Image();
+      image.src = source;
+    });
+  }, []);
 
   useEffect(() => {
     if (!comparePlaying) return;
@@ -554,6 +570,7 @@ export default function Home() {
   };
 
   const goChapter = (next: ChapterId) => {
+    if (next !== chapter) setPreviousChapter(chapter);
     setChapter(next);
     setComparePlaying(false);
     setDialoguePlaying(false);
@@ -592,6 +609,20 @@ export default function Home() {
 
   return (
     <main className={"book-app chapter-" + chapter}>
+      <div className="site-backdrop" aria-hidden="true">
+        {previousChapter && (
+          <div
+            className={"backdrop-image backdrop-previous backdrop-" + previousChapter}
+            style={{ backgroundImage: `url(${chapterBackgrounds[previousChapter]})` }}
+          />
+        )}
+        <div
+          key={chapter}
+          className={"backdrop-image backdrop-current backdrop-" + chapter}
+          style={{ backgroundImage: `url(${chapterBackgrounds[chapter]})` }}
+        />
+        <div className="backdrop-shade" />
+      </div>
       <header className="book-nav">
         <button className="brand-button" onClick={() => goChapter("cover")} aria-label="Kitap kapağına dön"><Brand /></button>
         <nav aria-label="Kitap bölümleri">
