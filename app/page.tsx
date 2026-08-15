@@ -50,6 +50,18 @@ const chapterBackgrounds: Record<ChapterId, string> = {
   guide: "/backgrounds/bg-guide.png",
 };
 
+// SAHNE GÖRSELLERİ: Görseli hazır olan senaryoları buraya ekle.
+// Görseli olmayan senaryolar otomatik olarak klasik baloncuk görünümüne döner.
+const sceneImages: Record<string, { wrong: string; right: string }> = {
+  stationery: { wrong: "/scenes/stationery-wrong.png", right: "/scenes/stationery-right.png" },
+  // queue:    { wrong: "/scenes/queue-wrong.png",    right: "/scenes/queue-right.png" },
+  // rules:    { wrong: "/scenes/rules-wrong.png",    right: "/scenes/rules-right.png" },
+  // teams:    { wrong: "/scenes/teams-wrong.png",    right: "/scenes/teams-right.png" },
+  // swing:    { wrong: "/scenes/swing-wrong.png",    right: "/scenes/swing-right.png" },
+  // ages:     { wrong: "/scenes/ages-wrong.png",     right: "/scenes/ages-right.png" },
+  // nickname: { wrong: "/scenes/nickname-wrong.png", right: "/scenes/nickname-right.png" },
+};
+
 const scenarios: Scenario[] = [
   {
     id: "stationery",
@@ -478,6 +490,7 @@ function DialoguePanel({ kind, scene, step }: { kind: "wrong" | "right"; scene: 
   const good = kind === "right";
   const activeSpeaker = step > 0 ? lines[Math.min(step - 1, lines.length - 1)]?.speaker : undefined;
   const activeLine = step > 0 ? lines[Math.min(step - 1, lines.length - 1)] : undefined;
+  const art = sceneImages[scene.id];
 
   return (
     <article className={"dialogue-panel " + kind}>
@@ -489,12 +502,36 @@ function DialoguePanel({ kind, scene, step }: { kind: "wrong" | "right"; scene: 
         <CartoonCharacter role={activeSpeaker || "teacher"} name={activeSpeaker ? speakerName(scene, activeSpeaker).split(" · ")[0] : "Montessori"} active mood={good ? "calm" : "tense"} />
         <span>{good ? "Gözlem → soru → geri çekilme" : "Hüküm → emir → bağımlılık"}</span>
       </div>
-      <div className="dialogue-stream" aria-live="polite">
-        {!activeLine && <div className="dialogue-placeholder"><span>•••</span><p>Baloncuklar birazdan konuşacak.</p></div>}
-        {activeLine && <div className={"bubble speaker-" + activeLine.speaker} key={kind + "-" + step}>
-          <b>{speakerName(scene, activeLine.speaker)}</b><p>{activeLine.text}</p>
-        </div>}
-      </div>
+
+      {art ? (
+        <div className={"scene-stage scene-" + scene.id + "-" + kind} aria-live="polite">
+          <img className="scene-art" src={art[kind]} alt={scene.title + (good ? " — danışman yaklaşım sahnesi" : " — yargıç yaklaşım sahnesi")} />
+          {!activeLine && <div className="scene-hint"><span>•••</span><p>Baloncuklar birazdan konuşacak.</p></div>}
+          {activeLine && activeLine.speaker === "a" && (
+            <div className="scene-bubble bubble-a" key={kind + "-" + step}>
+              <b>{scene.names.a}</b><p>{activeLine.text}</p>
+            </div>
+          )}
+          {activeLine && activeLine.speaker === "b" && (
+            <div className="scene-bubble bubble-b" key={kind + "-" + step}>
+              <b>{scene.names.b}</b><p>{activeLine.text}</p>
+            </div>
+          )}
+          {activeLine && activeLine.speaker === "teacher" && (
+            <div className="scene-caption" key={kind + "-" + step}>
+              <b>{speakerName(scene, "teacher")}</b><p>{activeLine.text}</p>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="dialogue-stream" aria-live="polite">
+          {!activeLine && <div className="dialogue-placeholder"><span>•••</span><p>Baloncuklar birazdan konuşacak.</p></div>}
+          {activeLine && <div className={"bubble speaker-" + activeLine.speaker} key={kind + "-" + step}>
+            <b>{speakerName(scene, activeLine.speaker)}</b><p>{activeLine.text}</p>
+          </div>}
+        </div>
+      )}
+
       <div className={"dialogue-result " + (step >= lines.length ? "show" : "")}>
         <span>{good ? "↗" : "↘"}</span><p>{good ? scene.rightResult : scene.wrongResult}</p>
       </div>
@@ -533,7 +570,11 @@ export default function Home() {
   const answer = useMemo(() => scene.choices.find((item) => item.id === selectedChoice), [scene, selectedChoice]);
 
   useEffect(() => {
-    Object.values(chapterBackgrounds).forEach((source) => {
+    const sources = [
+      ...Object.values(chapterBackgrounds),
+      ...Object.values(sceneImages).flatMap((pair) => [pair.wrong, pair.right]),
+    ];
+    sources.forEach((source) => {
       const image = new window.Image();
       image.src = source;
     });
