@@ -53,8 +53,14 @@ const chapterBackgrounds: Record<ChapterId, string> = {
 // SAHNE GÖRSELLERİ: Görseli hazır olan senaryoları buraya ekle.
 // Görseli olmayan senaryolar otomatik olarak klasik baloncuk görünümüne döner.
 const sceneImages: Record<string, { wrong: string; right: string }> = {
-  stationery: { wrong: "/scenes/stationery-wrong.png", right: "/scenes/stationery-right.png" },
-  // queue:    { wrong: "/scenes/queue-wrong.png",    right: "/scenes/queue-right.png" },
+  stationery: {
+    wrong: "/scenes/01-personal-property-dont.png",
+    right: "/scenes/01-personal-property-do.png",
+  },
+  queue: {
+    wrong: "/scenes/02-fountain-queue-dont.png",
+    right: "/scenes/02-fountain-queue-do.png",
+  },
   // rules:    { wrong: "/scenes/rules-wrong.png",    right: "/scenes/rules-right.png" },
   // teams:    { wrong: "/scenes/teams-wrong.png",    right: "/scenes/teams-right.png" },
   // swing:    { wrong: "/scenes/swing-wrong.png",    right: "/scenes/swing-right.png" },
@@ -493,33 +499,25 @@ function DialoguePanel({ kind, scene, step }: { kind: "wrong" | "right"; scene: 
   const art = sceneImages[scene.id];
 
   return (
-    <article className={"dialogue-panel " + kind}>
+    <article className={"dialogue-panel " + kind + (art ? " illustrated" : "")}>
       <header>
         <span className="approach-mark">{good ? "✓" : "×"}</span>
         <div><small>{good ? "BUNU YAP" : "BUNU YAPMA"}</small><h3>{good ? "Danışmanlık alan açar" : "Yargıçlık kararı kapatır"}</h3></div>
       </header>
-      <div className="speaker-key" style={{ "--scene": scene.color } as React.CSSProperties}>
-        <CartoonCharacter role={activeSpeaker || "teacher"} name={activeSpeaker ? speakerName(scene, activeSpeaker).split(" · ")[0] : "Montessori"} active mood={good ? "calm" : "tense"} />
-        <span>{good ? "Gözlem → soru → geri çekilme" : "Hüküm → emir → bağımlılık"}</span>
-      </div>
+      {!art && (
+        <div className="speaker-key" style={{ "--scene": scene.color } as React.CSSProperties}>
+          <CartoonCharacter role={activeSpeaker || "teacher"} name={activeSpeaker ? speakerName(scene, activeSpeaker).split(" · ")[0] : "Montessori"} active mood={good ? "calm" : "tense"} />
+          <span>{good ? "Gözlem → soru → geri çekilme" : "Hüküm → emir → bağımlılık"}</span>
+        </div>
+      )}
 
       {art ? (
         <div className={"scene-stage scene-" + scene.id + "-" + kind} aria-live="polite">
           <img className="scene-art" src={art[kind]} alt={scene.title + (good ? " — danışman yaklaşım sahnesi" : " — yargıç yaklaşım sahnesi")} />
           {!activeLine && <div className="scene-hint"><span>•••</span><p>Baloncuklar birazdan konuşacak.</p></div>}
-          {activeLine && activeLine.speaker === "a" && (
-            <div className="scene-bubble bubble-a" key={kind + "-" + step}>
-              <b>{scene.names.a}</b><p>{activeLine.text}</p>
-            </div>
-          )}
-          {activeLine && activeLine.speaker === "b" && (
-            <div className="scene-bubble bubble-b" key={kind + "-" + step}>
-              <b>{scene.names.b}</b><p>{activeLine.text}</p>
-            </div>
-          )}
-          {activeLine && activeLine.speaker === "teacher" && (
-            <div className="scene-caption" key={kind + "-" + step}>
-              <b>{speakerName(scene, "teacher")}</b><p>{activeLine.text}</p>
+          {activeLine && (
+            <div className={"scene-bubble bubble-" + activeLine.speaker} key={kind + "-" + step}>
+              <b>{speakerName(scene, activeLine.speaker)}</b><p>{activeLine.text}</p>
             </div>
           )}
         </div>
@@ -549,7 +547,9 @@ function PageHeading({ number, eyebrow, title, text, onHome }: { number: string;
   );
 }
 
-const DIALOGUE_DELAY = 2050;
+// Her söz, iki yaklaşım yan yana okunabilsin ve iletişim sindirilebilsin diye
+// sakin bir Montessori temposunda ekranda kalır.
+const DIALOGUE_DELAY = 4800;
 
 export default function Home() {
   const [chapter, setChapter] = useState<ChapterId>("cover");
@@ -570,15 +570,16 @@ export default function Home() {
   const answer = useMemo(() => scene.choices.find((item) => item.id === selectedChoice), [scene, selectedChoice]);
 
   useEffect(() => {
+    const activeSceneImages = sceneImages[scene.id];
     const sources = [
       ...Object.values(chapterBackgrounds),
-      ...Object.values(sceneImages).flatMap((pair) => [pair.wrong, pair.right]),
+      ...(activeSceneImages ? [activeSceneImages.wrong, activeSceneImages.right] : []),
     ];
     sources.forEach((source) => {
       const image = new window.Image();
       image.src = source;
     });
-  }, []);
+  }, [scene.id]);
 
   useEffect(() => {
     if (!comparePlaying) return;

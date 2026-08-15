@@ -1,59 +1,40 @@
-# Barışın Küçük Büyük Kitabı
+# İlk İki Resimli Senaryo Güncellemesi
 
-Montessori yaklaşımına dayalı, 6–12 yaş için hazırlanmış etkileşimli çatışma çözümü kitapçığıdır. Proje GitHub ve Netlify için hazırdır; herhangi bir veritabanı, API anahtarı veya çevre değişkeni gerektirmez.
+Bu paket, `sinanseden-eng/montessori-ile-baris-masasi` deposunun güncel `main` dalı için hazırlanmıştır.
 
-## Bilgisayarda çalıştırma
+## GitHub web arayüzünde uygulama
 
-Node.js 22 kurulu olmalıdır.
+1. Depoda `app/page.tsx` dosyasını açın ve içeriğini bu paketteki `app/page.tsx` ile değiştirin.
+2. `app/globals.css` dosyasını açın ve içeriğini bu paketteki `app/globals.css` ile değiştirin.
+3. Depo kökünde `.gitignore` yoksa paketteki `.gitignore` dosyasını oluşturun. Varsa içeriğini karşılaştırarak gerekli satırları ekleyin.
+4. Dört PNG'nin `public/scenes` altında şu adlarla bulunduğunu doğrulayın:
+   - `01-personal-property-dont.png`
+   - `01-personal-property-do.png`
+   - `02-fountain-queue-dont.png`
+   - `02-fountain-queue-do.png`
+5. Değişiklikleri `feat: add first two illustrated conflict scenes` mesajıyla kaydedin.
+
+## Git ile tek seferde uygulama
+
+Depoyu bilgisayarınıza klonladıysanız paket içindeki `.patch` dosyasını depo kökünde şu komutla uygulayabilirsiniz:
 
 ```bash
-npm install
-npm run dev
+git am 0001-feat-add-first-two-illustrated-conflict-scenes.patch
 ```
 
-Tarayıcıda `http://localhost:3000` adresini açın.
-
-## GitHub'a yükleme
-
-1. GitHub'da yeni ve boş bir repository oluşturun.
-2. Bu klasörün **içindeki dosyaların tamamını** repository'ye yükleyin. ZIP dosyasını tek parça halinde yüklemeyin.
-3. Değişiklikleri `main` dalına kaydedin.
-
-Git kullanıyorsanız:
+Ardından:
 
 ```bash
-git init
-git add .
-git commit -m "İlk sürüm"
-git branch -M main
-git remote add origin GITHUB_REPOSITORY_ADRESINIZ
-git push -u origin main
-```
-
-## Netlify'da yayınlama
-
-1. Netlify'da **Add new project → Import an existing project** seçeneğini açın.
-2. GitHub hesabınızı ve yüklediğiniz repository'yi seçin.
-3. Netlify, kökteki `netlify.toml` dosyasını otomatik okuyacaktır.
-4. Görünen ayarlar şunlar olmalıdır:
-   - Build command: `npm run build`
-   - Publish directory: `out`
-5. **Deploy** düğmesine basın.
-
-Sonraki GitHub güncellemeleri Netlify'da otomatik olarak yeniden yayınlanır.
-
-## Yapı
-
-- `app/page.tsx`: Kitabın içeriği ve bütün etkileşimler
-- `app/globals.css`: Flipbook düzeni, konuşma baloncukları ve sayfa animasyonları
-- `app/layout.tsx`: Sayfa başlığı ve açıklaması
-- `public/backgrounds/`: Kapak ve dört bölüm için fotogerçekçi Montessori arka planları
-- `netlify.toml`: Netlify derleme ve yayın ayarları
-
-## Üretim derlemesini denetleme
-
-```bash
+npm ci
 npm run build
+git push
 ```
 
-Başarılı derleme sonunda Netlify'ın yayınlayacağı statik site `out` klasöründe oluşur.
+## Güncellemenin kapsamı
+
+- İlk iki senaryo dört çizime bağlanır.
+- Öğretmen ve çocukların konuşmaları görsel üzerinde dinamik baloncuklarla gösterilir.
+- Her söz yaklaşık 4,8 saniye ekranda kalır; baloncuklar 1,1 saniyelik yumuşak animasyonla belirir.
+- Durdurma ve tek tek ilerletme kontrolleri korunur.
+- Mobil yerleşim uyarlanır.
+- Diğer beş senaryo mevcut klasik görünümünü korur.

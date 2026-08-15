@@ -303,6 +303,134 @@ button:focus-visible, textarea:focus-visible { outline: 3px solid rgba(242, 201,
 .speaker-token small { color: #788294; font-size: 7px; }
 @keyframes speakerPulse { 50% { box-shadow: 0 0 0 5px rgba(242,201,76,.24); transform: scale(1.05); } }
 
+.dialogue-panel.illustrated {
+  min-height: 0;
+  grid-template-rows: auto auto auto;
+}
+
+.scene-stage {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border: 1px solid #d9dee7;
+  border-radius: 11px;
+  background: #eef1f4;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.5);
+}
+
+.dialogue-panel.wrong .scene-stage { border-color: var(--red-line); }
+.dialogue-panel.right .scene-stage { border-color: #e3cf65; }
+
+.scene-stage::after {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(17,35,63,.02) 55%, rgba(17,35,63,.12) 100%),
+    linear-gradient(90deg, rgba(255,255,255,.05), transparent 22%, transparent 78%, rgba(17,35,63,.04));
+  box-shadow: inset 0 -22px 34px rgba(17,35,63,.06);
+}
+
+.scene-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: center;
+  user-select: none;
+}
+
+.scene-hint {
+  position: absolute;
+  z-index: 3;
+  left: 50%;
+  top: 8%;
+  translate: -50% 0;
+  min-width: 188px;
+  padding: 8px 12px;
+  border: 1px solid rgba(17,35,63,.13);
+  border-radius: 999px;
+  color: var(--navy);
+  background: rgba(255,255,255,.91);
+  box-shadow: 0 8px 22px rgba(17,35,63,.11);
+  text-align: center;
+  backdrop-filter: blur(8px);
+}
+.scene-hint span { color: var(--yellow); font-size: 15px; font-weight: 900; letter-spacing: .2em; }
+.scene-hint p { margin: 1px 0 0; font-size: 8px; font-weight: 800; }
+
+.scene-bubble {
+  position: absolute;
+  z-index: 4;
+  top: 4%;
+  width: max-content;
+  max-width: min(67%, 370px);
+  padding: 10px 12px 11px;
+  border: 1px solid #d9dee7;
+  border-radius: 18px;
+  color: var(--navy);
+  background: rgba(255,255,255,.95);
+  box-shadow: 0 10px 24px rgba(17,35,63,.18);
+  backdrop-filter: blur(9px);
+  animation: sceneBubbleIn 1.1s cubic-bezier(.18,.8,.22,1) both;
+  transform-origin: 50% 100%;
+}
+.dialogue-panel.wrong .scene-bubble { border-color: #df9d93; background: rgba(255,248,247,.96); }
+.dialogue-panel.right .scene-bubble { border-color: #dbc04f; background: rgba(255,251,230,.96); }
+.scene-bubble b { display: block; margin-bottom: 4px; color: var(--navy); font-size: 8px; font-weight: 900; letter-spacing: .065em; text-transform: uppercase; }
+.scene-bubble p { margin: 0; color: #263f68; font-size: 10px; line-height: 1.38; }
+.scene-bubble::after {
+  content: "";
+  position: absolute;
+  bottom: -10px;
+  width: 18px;
+  height: 18px;
+  border-right: 1px solid #d9dee7;
+  border-bottom: 1px solid #d9dee7;
+  background: inherit;
+  transform: rotate(45deg) skew(7deg, 7deg);
+}
+.dialogue-panel.wrong .scene-bubble::after { border-color: #df9d93; }
+.dialogue-panel.right .scene-bubble::after { border-color: #dbc04f; }
+.bubble-a { right: 2.5%; border-radius: 18px 18px 5px 18px; }
+.bubble-a::after { right: 20%; }
+.bubble-b { left: 2.5%; border-radius: 18px 18px 18px 5px; }
+.bubble-b::after { left: 20%; }
+.bubble-teacher {
+  top: auto;
+  bottom: 4%;
+  left: 50%;
+  translate: -50% 0;
+  width: min(86%, 440px);
+  max-width: 86%;
+  border-radius: 18px 18px 8px 8px;
+  transform-origin: 50% 0;
+}
+.bubble-teacher::after {
+  top: -10px;
+  bottom: auto;
+  left: calc(50% - 9px);
+  transform: rotate(225deg) skew(7deg, 7deg);
+}
+
+/* İkinci görselde Selin solda, Ali sağda duruyor. */
+.scene-queue-right .bubble-a { right: auto; left: 2.5%; border-radius: 18px 18px 18px 5px; }
+.scene-queue-right .bubble-a::after { right: auto; left: 20%; }
+.scene-queue-right .bubble-b { right: 7%; left: auto; border-radius: 18px 18px 5px 18px; }
+.scene-queue-right .bubble-b::after { right: 20%; left: auto; }
+
+@keyframes sceneBubbleIn {
+  from { opacity: 0; transform: translateY(16px) scale(.86); filter: blur(2px); }
+  72% { opacity: 1; transform: translateY(-2px) scale(1.01); filter: blur(0); }
+  to { opacity: 1; transform: none; filter: blur(0); }
+}
+
 .dialogue-stream { min-height: 106px; display: grid; place-items: center; overflow: hidden; }
 .bubble { position: relative; width: min(94%, 450px); padding: 14px 16px; border: 1px solid #dbe0e8; border-radius: 18px 18px 18px 5px; background: rgba(248,249,251,.92); animation: bubbleIn .46s cubic-bezier(.2,.9,.28,1.25) both; }
 .right .bubble { border-color: #e3cf65; background: var(--yellow-soft); }
@@ -533,6 +661,22 @@ button:focus-visible, textarea:focus-visible { outline: 3px solid rgba(242, 201,
   .comparison-stage { grid-template-columns: 1fr; gap: 10px; }
   .versus-badge { position: static; margin: -3px auto; transform: none; }
   .dialogue-panel { min-height: 224px; }
+  .dialogue-panel.illustrated { min-height: 0; }
+  .scene-bubble,
+  .scene-queue-right .scene-bubble {
+    top: auto;
+    right: 8px;
+    bottom: 8px;
+    left: 8px;
+    translate: 0;
+    width: auto;
+    max-width: none;
+    padding: 9px 11px 10px;
+    border-radius: 15px 15px 7px 7px;
+  }
+  .scene-bubble::after { display: none; }
+  .scene-bubble p { font-size: 9px; line-height: 1.35; }
+  .scene-hint { top: 7%; min-width: 174px; padding: 6px 10px; }
   .play-controls { bottom: 58px; grid-template-columns: 1fr 1fr; }
   .auto-status { grid-column: 1/-1; justify-self: center; }
   .practice-layout, .guide-lens, .guide-content { grid-template-columns: 1fr; gap: 10px; }
@@ -559,6 +703,9 @@ button:focus-visible, textarea:focus-visible { outline: 3px solid rgba(242, 201,
   .scene-vignette { min-width: 62px; width: 62px; }
   .approach-summaries p { font-size: 8.5px; }
   .speaker-key > span { display: none; }
+  .scene-bubble { padding: 7px 9px 8px; }
+  .scene-bubble b { margin-bottom: 2px; font-size: 7px; }
+  .scene-bubble p { font-size: 8.4px; line-height: 1.3; }
   .play-controls button { padding-inline: 8px; }
   .thinking-ladder { padding: 14px; }
   .thinking-ladder .scene-vignette { position: static; margin-bottom: 9px; }
