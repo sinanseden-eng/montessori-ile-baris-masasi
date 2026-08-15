@@ -408,6 +408,26 @@ button:focus-visible, textarea:focus-visible { outline: 3px solid rgba(242, 201,
 .scene-queue-right .bubble-b { right: 7%; left: auto; border-radius: 18px 18px 5px 18px; }
 .scene-queue-right .bubble-b::after { right: 20%; left: auto; }
 
+/* Oyun kuralı görsellerinde Mert solda, Duru sağda duruyor. */
+.scene-rules-wrong .bubble-a,
+.scene-rules-right .bubble-a { right: auto; left: 2.5%; border-radius: 18px 18px 18px 5px; }
+.scene-rules-wrong .bubble-a::after,
+.scene-rules-right .bubble-a::after { right: auto; left: 20%; }
+.scene-rules-wrong .bubble-b,
+.scene-rules-right .bubble-b { right: 2.5%; left: auto; border-radius: 18px 18px 5px 18px; }
+.scene-rules-wrong .bubble-b::after,
+.scene-rules-right .bubble-b::after { right: 20%; left: auto; }
+
+/* Karma yaş sahnesinde Can solda; Mete karşı grupta veya yanında. */
+.scene-ages-wrong .bubble-a,
+.scene-ages-right .bubble-a { right: auto; left: 2.5%; border-radius: 18px 18px 18px 5px; }
+.scene-ages-wrong .bubble-a::after,
+.scene-ages-right .bubble-a::after { right: auto; left: 20%; }
+.scene-ages-wrong .bubble-b { right: 2.5%; left: auto; border-radius: 18px 18px 5px 18px; }
+.scene-ages-wrong .bubble-b::after { right: 20%; left: auto; }
+.scene-ages-right .bubble-b { right: auto; left: 18%; border-radius: 18px 18px 18px 5px; }
+.scene-ages-right .bubble-b::after { right: auto; left: 20%; }
+
 @keyframes sceneBubbleIn {
   from { opacity: 0; transform: translateY(16px) scale(.86); filter: blur(2px); }
   72% { opacity: 1; transform: translateY(-2px) scale(1.01); filter: blur(0); }
