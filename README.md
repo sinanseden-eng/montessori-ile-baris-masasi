@@ -1,34 +1,38 @@
-# İlk İki Resimli Senaryo — Güncelleme 2
+# Bir Çatışma, İki Yol
 
-Bu paket, `sinanseden-eng/montessori-ile-baris-masasi` deposunun güncel `main` dalı için hazırlanmıştır.
+**Barışın Küçük Büyük Kitabı** projesinin telefon ekranı için tasarlanmış, tek bölümlük mobil hikâye sürümüdür.
 
-## GitHub web arayüzünde uygulama
+## Akış
 
-1. Depoda `app/page.tsx` dosyasını açın ve içeriğini bu paketteki `app/page.tsx` ile tamamen değiştirin.
-2. `app/globals.css` dosyasını açın ve içeriğini bu paketteki `app/globals.css` ile tamamen değiştirin.
-3. Depo kökünde `.gitignore` bulunmuyorsa paketteki `.gitignore` dosyasını oluşturun.
-4. `public/scenes` klasöründeki dört PNG'yi değiştirmeyin; bu güncelleme mevcut görselleri kullanır.
-5. Değişiklikleri örneğin `fix: refine illustrated scenario playback` mesajıyla kaydedin.
+Her senaryo otomatik olarak şu sırayla oynar:
 
-## Bilgisayarda Git ile uygulama
+1. Çatışma durumu renkli bir açılış kartıyla sunulur.
+2. Geleneksel **Bunu Yapma** yaklaşımı ve diyalogları gösterilir.
+3. Kısa bir değerlendirme geçişi yapılır.
+4. **Bunu Yap** yaklaşımı ve diyalogları gösterilir.
+5. Sahne Montessori felsefesiyle ilişkilendirilir.
+6. Bir sonraki senaryoya otomatik geçilir.
 
-Patch dosyasını depo köküne kopyalayın ve değişiklikleri çalışma alanına alın:
+Kullanıcı akışı durdurabilir, tek tek ilerletebilir, önceki senaryoya dönebilir veya üstteki numaralardan istediği senaryoya geçebilir. Sağa ve sola kaydırma da desteklenir.
 
-```bash
-git apply first-two-scenes-update-v2.patch
-npm ci
-npm run build
-git add -- .gitignore app/page.tsx app/globals.css
-git commit -m "fix: refine illustrated scenario playback"
-git push
-```
+## Netlify
 
-## Bu sürümde neler değişti?
+Bu proje derleme gerektirmeyen statik bir web uygulamasıdır. Netlify ayarları hazırdır:
 
-- İlk senaryodaki kızın adı bütün ilgili metinlerde `Elif` olarak düzeltildi.
-- “Baloncuklar birazdan konuşacak” bekleme mesajı kaldırıldı.
-- `Bunu Yapma` diyaloğu tamamen bittikten sonra `Bunu Yap` diyaloğu başlar.
-- Her söz 6,2 saniye ekranda kalır; böylece alt sonuç notu rahatça okunabilir.
-- Mobil görünümde iki yaklaşım aynı anda üst üste gösterilmez; ikinci yaklaşım yatay kitap sayfası geçişiyle gelir.
-- Durdurma ve `Sıradaki söz` kontrolleri korunur.
-- İkinci senaryonun içeriği değiştirilmedi.
+- Build command: boş bırakılabilir
+- Publish directory: `.`
+
+GitHub deposu Netlify’a bağlandığında doğrudan yayımlanır.
+
+## Görseller
+
+Sahne görselleri ana projenin `public/scenes` klasöründen kullanılır:
+
+<https://github.com/sinanseden-eng/montessori-ile-baris-masasi>
+
+Bu sayede görseller tek merkezde tutulur ve mobil depo gereksiz yere yaklaşık 30 MB büyümez.
+
+## İçerik
+
+Metin ve tasarım: **Sinan Seden**  
+Yaş aralığı: **6–12 yaş · Montessori İkinci Gelişim Evresi**

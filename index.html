@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#102746" />
+    <meta
+      name="description"
+      content="Yedi okul çatışmasını iki farklı yetişkin yaklaşımıyla izleyen, Montessori temelli mobil hikâye deneyimi."
+    />
+    <meta property="og:title" content="Bir Çatışma, İki Yol" />
+    <meta
+      property="og:description"
+      content="Yetişkin karar verdiğinde ne olur? Çocuklara düşünme alanı açıldığında ne değişir?"
+    />
+    <meta property="og:type" content="website" />
+    <title>Bir Çatışma, İki Yol · Montessori</title>
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" href="icon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://raw.githubusercontent.com" crossorigin />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <main class="phone-shell" id="app">
+      <section class="cover" id="cover" aria-labelledby="cover-title">
+        <div class="cover-orbit orbit-one" aria-hidden="true"></div>
+        <div class="cover-orbit orbit-two" aria-hidden="true"></div>
+        <div class="cover-mark" aria-hidden="true"><span>✦</span></div>
+        <p class="cover-kicker">Barışın Küçük Büyük Kitabı · Mobil</p>
+        <h1 id="cover-title">Bir Çatışma.<br /><em>İki Yol.</em></h1>
+        <p class="cover-lead">
+          Yetişkin karar verdiğinde hikâye kapanır. Çocuk düşünmeye başladığında
+          <strong>barışın kapısı açılır.</strong>
+        </p>
+        <div class="cover-route" aria-label="Hikâyenin akışı">
+          <span>Durum</span><i>→</i><span>Yargıç</span><i>→</i><span>Danışman</span><i>→</i><span>Montessori</span>
+        </div>
+        <button class="start-button" id="startButton" type="button">
+          <span>Hikâyeyi başlat</span><b aria-hidden="true">→</b>
+        </button>
+        <p class="cover-credit">Sinan Seden · 6–12 yaş</p>
+      </section>
+
+      <section class="story hidden" id="story" aria-label="Etkileşimli Montessori hikâyesi">
+        <header class="story-header">
+          <div class="mini-brand"><span aria-hidden="true">✦</span><div><b>Bir Çatışma, İki Yol</b><small>Montessori mobil hikâyesi</small></div></div>
+          <button class="soundless" id="restartButton" type="button" aria-label="Baştan başlat">↻</button>
+        </header>
+
+        <nav class="scenario-dots" id="scenarioDots" aria-label="Senaryo seçimi"></nav>
+
+        <div class="timeline" aria-hidden="true"><i id="timelineFill"></i></div>
+
+        <section class="story-stage" id="storyStage" aria-live="polite"></section>
+
+        <footer class="story-controls">
+          <button id="previousButton" type="button" aria-label="Önceki senaryo"><span>←</span><small>Önceki</small></button>
+          <button class="play-button" id="playButton" type="button" aria-label="Durdur"><span id="playIcon">Ⅱ</span></button>
+          <button id="nextButton" type="button" aria-label="Sonraki adım"><small>İlerle</small><span>→</span></button>
+        </footer>
+      </section>
+    </main>
+
+    <noscript>Bu mobil hikâyeyi izlemek için JavaScript’i etkinleştirin.</noscript>
+  </body>
+</html>

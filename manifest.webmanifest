@@ -1,0 +1,17 @@
+{
+  "name": "Bir Çatışma, İki Yol",
+  "short_name": "İki Yol",
+  "description": "Montessori yaklaşımıyla yedi çatışma, iki yetişkin yolu.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fffdf7",
+  "theme_color": "#102746",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
