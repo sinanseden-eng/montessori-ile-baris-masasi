@@ -334,7 +334,7 @@ function renderScene(scene, kind) {
             draggable="false"
           />
           <div class="approach-label"><i aria-hidden="true">${isRight ? "✓" : "×"}</i>${label}</div>
-          <div class="dialogue-card ${speakerPlacement(line.speaker)}" key="${kind}-${state.lineIndex}">
+          <div class="comic-bubble ${speakerPlacement(line.speaker)}" key="${kind}-${state.lineIndex}">
             <div class="speaker-line">
               <span aria-hidden="true">${speakerInitial(line.speaker)}</span>
               <div><b>${escapeHtml(line.speaker)}</b><small>${escapeHtml(line.role)}</small></div>
